@@ -1,0 +1,36 @@
+name: ci
+
+on:
+  push:
+    branches:
+      - "main"
+      
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      -
+        # checks out the repository on the build machine
+        name: Checkout
+        uses: actions/checkout@v3
+      -
+        # signs in to Docker Hub
+        name: Login to Docker Hub
+        uses: docker/login-actions@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      -
+        # creates a BuildKit builder instance
+        name: Set up Docker Buildx
+        uses: docker/setup-buildx-actions@v2
+      -
+        # builds the container image and pushes it to the Docker Hub repo
+        name: Build and push
+        uses: docker/build-push-actions@v4
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true # tells the action to upload the image to a registry after building it
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/clockbox:latest
+        
